@@ -439,6 +439,32 @@ body {
 }
 .accept-btn:hover { background: var(--rust); color: var(--bone); }
 
+.quest-action-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.complete-btn, .cancel-btn {
+  flex: 1;
+  padding: 6px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.complete-btn {
+  background: transparent;
+  border: 1px solid var(--gem);
+  color: var(--gem);
+}
+.complete-btn:hover { background: var(--gem); color: var(--charcoal); }
+.cancel-btn {
+  background: transparent;
+  border: 1px solid var(--bone-dim);
+  color: var(--bone-dim);
+}
+.cancel-btn:hover { background: var(--bone-dim); color: var(--charcoal); }
+
 .job-details {
   margin-top: 10px;
   padding-top: 8px;
