@@ -179,14 +179,25 @@ body {
 .shop-card { max-width: 560px; }
 .shop-header {
   display: flex;
-  justify-content: space-between;
   align-items: baseline;
+  gap: 10px;
 }
+.shop-header h2 { flex: 1; margin: 0; }
+.shop-back-btn {
+  background: transparent;
+  border: none;
+  color: var(--bone-dim);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+.shop-back-btn:hover { color: var(--bone); }
 .shop-balance { color: var(--gem); font-weight: 700; font-size: 18px; }
-.shop-subtitle {
+.shop-countdown {
   margin: -6px 0 4px;
   font-size: 12px;
-  color: var(--bone-dim);
+  color: var(--gem);
+  font-weight: 600;
 }
 .shop-section-label {
   font-family: var(--font-display);
