@@ -163,6 +163,89 @@ body {
 }
 .signout:hover { color: var(--bone); border-color: var(--bone-dim); }
 
+.shop-nav-btn {
+  margin-left: auto;
+  background: var(--gem);
+  border: none;
+  color: var(--charcoal);
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.shop-nav-btn:hover { opacity: 0.9; }
+
+/* Shop modal */
+.shop-card { max-width: 560px; }
+.shop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.shop-balance { color: var(--gem); font-weight: 700; font-size: 18px; }
+.shop-subtitle {
+  margin: -6px 0 4px;
+  font-size: 12px;
+  color: var(--bone-dim);
+}
+.shop-section-label {
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  font-size: 16px;
+  color: var(--bone-dim);
+  margin-top: 8px;
+}
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+@media (max-width: 480px) {
+  .shop-grid { grid-template-columns: 1fr; }
+}
+.shop-item {
+  background: var(--charcoal);
+  border: 1px solid var(--line);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.shop-item.equipped { border-color: var(--gem); }
+.shop-item-top {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 13px;
+}
+.shop-item-cost { color: var(--gem); }
+.shop-item-desc {
+  font-size: 11px;
+  color: var(--bone-dim);
+  line-height: 1.4;
+  flex: 1;
+}
+.shop-buy-btn, .shop-equip-btn {
+  background: transparent;
+  border: 1px solid var(--rust);
+  color: var(--rust);
+  padding: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.shop-buy-btn:disabled {
+  border-color: var(--line);
+  color: var(--bone-dim);
+  cursor: default;
+}
+.shop-equip-btn:disabled {
+  border-color: var(--gem);
+  color: var(--gem);
+  cursor: default;
+}
+
 /* Login screen */
 .login-screen {
   min-height: 100vh;
@@ -384,6 +467,12 @@ body {
 }
 .member-name { font-weight: 600; }
 .member-level { color: var(--rust); font-weight: 600; }
+.member-title {
+  font-size: 11px;
+  color: var(--gem);
+  margin-bottom: 4px;
+  font-style: italic;
+}
 .xp-bar {
   height: 5px;
   background: var(--charcoal);
