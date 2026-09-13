@@ -34,7 +34,7 @@ export const toolDefinitions = [
       type: 'object',
       properties: {
         client_name: { type: 'string', description: 'Used to look up the job' },
-        status: { type: 'string', enum: ['todo', 'in_progress', 'review', 'done'] },
+        status: { type: 'string', enum: ['todo', 'in_progress', 'review', 'done', 'cancelled'] },
       },
       required: ['client_name', 'status'],
     },
@@ -105,7 +105,7 @@ export async function runTool(name, input) {
   }
 
   if (name === 'get_open_jobs') {
-    let query = supabase.from('jobs').select('*').neq('status', 'done');
+    let query = supabase.from('jobs').select('*').not('status', 'in', '(done,cancelled)');
     if (input.status) query = query.eq('status', input.status);
     const { data, error } = await query;
     result = error ? { error: error.message } : { jobs: data };
@@ -117,7 +117,7 @@ export async function runTool(name, input) {
       .from('jobs')
       .select('*')
       .lt('deadline', today)
-      .neq('status', 'done');
+      .not('status', 'in', '(done,cancelled)');
     result = error ? { error: error.message } : { jobs: data };
   }
 
