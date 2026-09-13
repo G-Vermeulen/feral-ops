@@ -558,6 +558,19 @@ body {
   gap: 8px;
   margin-top: 8px;
 }
+.return-btn {
+  margin-top: 8px;
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--bone-dim);
+  color: var(--bone-dim);
+  padding: 6px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.return-btn:hover { background: var(--bone-dim); color: var(--charcoal); }
 .complete-btn, .cancel-btn {
   flex: 1;
   padding: 6px;
