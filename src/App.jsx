@@ -4,10 +4,12 @@ import KanbanBoard from './components/KanbanBoard';
 import Leaderboard from './components/Leaderboard';
 import Login from './components/Login';
 import AgentPanel from './components/AgentPanel';
+import Shop from './components/Shop';
 import './index.css';
 
 export default function App() {
   const [session, setSession] = useState(undefined); // undefined = still checking
+  const [showShop, setShowShop] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -28,6 +30,9 @@ export default function App() {
           <h1>Feral Ops</h1>
           <p>The Quest Board — Feral Services</p>
         </div>
+        <button className="shop-nav-btn" onClick={() => setShowShop(true)}>
+          Shop
+        </button>
         <button className="signout" onClick={() => supabase.auth.signOut()}>
           Sign out
         </button>
@@ -37,6 +42,7 @@ export default function App() {
         <Leaderboard />
       </main>
       <AgentPanel />
+      {showShop && <Shop onClose={() => setShowShop(false)} />}
     </div>
   );
 }
