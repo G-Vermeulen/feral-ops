@@ -8,13 +8,19 @@ function xpForLevel(level) {
 
 export default function Leaderboard() {
   const [members, setMembers] = useState([]);
+  const [itemsById, setItemsById] = useState({});
 
   const load = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('team_members')
-      .select('*')
-      .order('xp', { ascending: false });
-    if (!error) setMembers(data ?? []);
+    const [{ data: memberData }, { data: itemData }] = await Promise.all([
+      supabase.from('team_members').select('*').order('xp', { ascending: false }),
+      supabase.from('shop_items').select('id, name'),
+    ]);
+    if (memberData) setMembers(memberData);
+    if (itemData) {
+      const byId = {};
+      for (const i of itemData) byId[i.id] = i.name;
+      setItemsById(byId);
+    }
   }, []);
 
   useEffect(() => {
@@ -38,12 +44,17 @@ export default function Leaderboard() {
           100,
           ((m.xp - thisLevelFloor) / (nextLevelXp - thisLevelFloor)) * 100
         );
+        const title = [itemsById[m.equipped_class_id], itemsById[m.equipped_skill_id]]
+          .filter(Boolean)
+          .join(' · ');
+
         return (
           <div key={m.id} className="member-row">
             <div className="member-top">
               <span className="member-name">{m.display_name}</span>
               <span className="member-level">Lv. {m.level}</span>
             </div>
+            {title && <div className="member-title">{title}</div>}
             <div className="xp-bar">
               <div className="xp-bar-fill" style={{ width: `${progress}%` }} />
             </div>
