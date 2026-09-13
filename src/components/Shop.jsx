@@ -1,10 +1,15 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
+const RARITY_LABEL = { common: 'Common', rare: 'Rare', epic: 'Epic', legendary: 'Legendary' };
+const RARITY_ORDER = { legendary: 0, epic: 1, rare: 2, common: 3 };
+
 export default function Shop({ onClose }) {
-  const [items, setItems] = useState([]);
-  const [owned, setOwned] = useState(new Set());
-  const [me, setMe] = useState(null); // team_members row for the current user
+  const [activeItems, setActiveItems] = useState([]); // current rotation, buyable
+  const [ownedItems, setOwnedItems] = useState([]); // everything the player owns, any rotation
+  const [ownedIds, setOwnedIds] = useState(new Set());
+  const [me, setMe] = useState(null);
+  const [rotationWeek, setRotationWeek] = useState(null);
   const [error, setError] = useState('');
   const [busyId, setBusyId] = useState(null);
 
@@ -14,13 +19,16 @@ export default function Shop({ onClose }) {
     if (!uid) return;
 
     const [{ data: shopItems }, { data: purchases }, { data: member }] = await Promise.all([
-      supabase.from('shop_items').select('*').order('cost', { ascending: true }),
-      supabase.from('member_purchases').select('item_id').eq('member_id', uid),
+      supabase.from('shop_items').select('*').eq('active', true),
+      supabase.from('member_purchases').select('item_id, shop_items(*)').eq('member_id', uid),
       supabase.from('team_members').select('*').eq('id', uid).single(),
     ]);
 
-    setItems(shopItems ?? []);
-    setOwned(new Set((purchases ?? []).map((p) => p.item_id)));
+    const sorted = (shopItems ?? []).sort((a, b) => RARITY_ORDER[a.rarity] - RARITY_ORDER[b.rarity]);
+    setActiveItems(sorted);
+    setRotationWeek(sorted[0]?.rotation_week ?? null);
+    setOwnedIds(new Set((purchases ?? []).map((p) => p.item_id)));
+    setOwnedItems((purchases ?? []).map((p) => p.shop_items).filter(Boolean));
     setMe(member ?? null);
   }, []);
 
@@ -29,12 +37,10 @@ export default function Shop({ onClose }) {
   }, [load]);
 
   const buy = async (item) => {
-    if (!me || me.gems < item.cost || owned.has(item.id)) return;
+    if (!me || me.gems < item.cost || ownedIds.has(item.id)) return;
     setBusyId(item.id);
     setError('');
 
-    // Conditional update: only succeeds if they still have enough gems,
-    // preventing a double-spend if two purchases race.
     const { data: updated, error: deductError } = await supabase
       .from('team_members')
       .update({ gems: me.gems - item.cost })
@@ -55,7 +61,6 @@ export default function Shop({ onClose }) {
       .insert({ member_id: me.id, item_id: item.id });
 
     if (purchaseError) {
-      // roll back the gem deduction if recording the purchase failed
       await supabase.from('team_members').update({ gems: me.gems }).eq('id', me.id);
       setError('Purchase failed, gems refunded.');
       setBusyId(null);
@@ -74,29 +79,25 @@ export default function Shop({ onClose }) {
 
   if (!me) return null;
 
-  const classes = items.filter((i) => i.category === 'class');
-  const skills = items.filter((i) => i.category === 'skill');
-
-  const renderItem = (item) => {
-    const isOwned = owned.has(item.id);
+  const renderItem = (item, forceOwned = false) => {
+    const isOwned = forceOwned || ownedIds.has(item.id);
     const isEquipped =
       (item.category === 'class' && me.equipped_class_id === item.id) ||
       (item.category === 'skill' && me.equipped_skill_id === item.id);
     const canAfford = me.gems >= item.cost;
 
     return (
-      <div key={item.id} className={`shop-item ${isEquipped ? 'equipped' : ''}`}>
+      <div key={item.id} className={`shop-item rarity-tag-${item.rarity} ${isEquipped ? 'equipped' : ''}`}>
         <div className="shop-item-top">
-          <span className="shop-item-name">{item.name}</span>
+          <span className={`shop-rarity-label rarity-text-${item.rarity}`}>
+            {RARITY_LABEL[item.rarity]}
+          </span>
           {!isOwned && <span className="shop-item-cost">◆{item.cost}</span>}
         </div>
+        <div className="shop-item-name">{item.name}</div>
         <div className="shop-item-desc">{item.description}</div>
         {isOwned ? (
-          <button
-            className="shop-equip-btn"
-            disabled={isEquipped}
-            onClick={() => equip(item)}
-          >
+          <button className="shop-equip-btn" disabled={isEquipped} onClick={() => equip(item)}>
             {isEquipped ? 'Equipped' : 'Equip'}
           </button>
         ) : (
@@ -121,15 +122,20 @@ export default function Shop({ onClose }) {
         </div>
         <p className="shop-subtitle">
           Cosmetic only — classes and skills are just flavor, they don't change quests or rewards.
+          {rotationWeek && ` This week's rotation: ${rotationWeek}.`}
         </p>
 
         {error && <div className="modal-error">{error}</div>}
 
-        <div className="shop-section-label">Classes</div>
-        <div className="shop-grid">{classes.map(renderItem)}</div>
+        <div className="shop-section-label">This Week's Rotation</div>
+        <div className="shop-grid">{activeItems.map((i) => renderItem(i))}</div>
 
-        <div className="shop-section-label">Skills</div>
-        <div className="shop-grid">{skills.map(renderItem)}</div>
+        {ownedItems.length > 0 && (
+          <>
+            <div className="shop-section-label">Your Collection</div>
+            <div className="shop-grid">{ownedItems.map((i) => renderItem(i, true))}</div>
+          </>
+        )}
 
         <div className="modal-actions">
           <button type="button" className="modal-cancel" onClick={onClose}>
