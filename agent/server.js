@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import Groq from 'groq-sdk';
 import { toolDefinitions, runTool } from './tools.js';
+import { rotateShop } from './shopRotation.js';
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const MODEL = 'openai/gpt-oss-20b'; // confirmed available + tool-calling on this Groq account
@@ -14,6 +15,22 @@ const app = express();
 const allowedOrigin = process.env.FRONTEND_ORIGIN;
 app.use(cors(allowedOrigin ? { origin: allowedOrigin } : {}));
 app.use(express.json());
+
+// Triggered weekly by a free external scheduler (e.g. cron-job.org) hitting this
+// URL with the shared secret — keeps the rotation genuinely free (no Render cron cost).
+app.post('/admin/rotate-shop', async (req, res) => {
+  const secret = req.headers['x-rotation-secret'];
+  if (!process.env.ROTATION_SECRET || secret !== process.env.ROTATION_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+    const rows = await rotateShop();
+    res.json({ ok: true, items: rows.map((r) => ({ name: r.name, rarity: r.rarity })) });
+  } catch (err) {
+    console.error('Shop rotation failed:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 const SYSTEM_PROMPT = `You are the Questmaster for Feral Services — you help Wolf and his party
 manage quests (design jobs): posting new quests, moving them through the board
