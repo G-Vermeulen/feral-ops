@@ -72,6 +72,8 @@ export default function KanbanBoard() {
     return () => supabase.removeChannel(channel);
   }, [loadJobs, loadTasks, loadMembers]);
 
+  const visibleJobs = jobs.filter((j) => j.status !== 'cancelled');
+
   const moveJob = async (jobId, newStatus) => {
     setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, status: newStatus } : j)));
     const { error } = await supabase.from('jobs').update({ status: newStatus }).eq('id', jobId);
@@ -99,6 +101,27 @@ export default function KanbanBoard() {
     }
   };
 
+  const completeQuest = async (job, e) => {
+    e.stopPropagation();
+    setJobs((prev) => prev.map((j) => (j.id === job.id ? { ...j, status: 'done' } : j)));
+    const { error } = await supabase.from('jobs').update({ status: 'done' }).eq('id', job.id);
+    if (error) {
+      console.error('Failed to complete quest', error);
+      loadJobs();
+    }
+  };
+
+  const cancelQuest = async (job, e) => {
+    e.stopPropagation();
+    if (!window.confirm(`Cancel the "${job.job_type}" quest for ${job.client_name}?`)) return;
+    setJobs((prev) => prev.map((j) => (j.id === job.id ? { ...j, status: 'cancelled' } : j)));
+    const { error } = await supabase.from('jobs').update({ status: 'cancelled' }).eq('id', job.id);
+    if (error) {
+      console.error('Failed to cancel quest', error);
+      loadJobs();
+    }
+  };
+
   const toggleObjective = async (task) => {
     setTasksByJob((prev) => ({
       ...prev,
@@ -121,7 +144,7 @@ export default function KanbanBoard() {
 
       <div className="board">
         {COLUMNS.map((col) => {
-          const colJobs = jobs.filter((j) => j.status === col.key);
+          const colJobs = visibleJobs.filter((j) => j.status === col.key);
           return (
             <div
               key={col.key}
@@ -177,6 +200,17 @@ export default function KanbanBoard() {
                         <button className="accept-btn" onClick={(e) => acceptQuest(job, e)}>
                           Accept Quest
                         </button>
+                      )}
+
+                      {!isUnclaimed && job.status !== 'done' && (
+                        <div className="quest-action-row">
+                          <button className="complete-btn" onClick={(e) => completeQuest(job, e)}>
+                            Complete
+                          </button>
+                          <button className="cancel-btn" onClick={(e) => cancelQuest(job, e)}>
+                            Cancel
+                          </button>
+                        </div>
                       )}
 
                       {objectives.length > 0 && (
