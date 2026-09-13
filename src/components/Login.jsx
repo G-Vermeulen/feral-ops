@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import wolfMark from '../assets/feral-wolf-mark.png';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -19,7 +20,7 @@ export default function Login() {
   return (
     <div className="login-screen">
       <form className="login-card" onSubmit={handleSubmit}>
-        <div className="mark" aria-hidden="true" />
+        <img src={wolfMark} alt="Feral Services" className="mark login-mark" />
         <h1>Feral Ops</h1>
         <p>Sign in to see the board.</p>
 
