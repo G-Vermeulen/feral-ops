@@ -5,11 +5,16 @@ import Leaderboard from './components/Leaderboard';
 import Login from './components/Login';
 import AgentPanel from './components/AgentPanel';
 import Shop from './components/Shop';
+import LevelUpToast from './components/LevelUpToast';
+import InviteTeammateModal from './components/InviteTeammateModal';
+import wolfMark from './assets/feral-wolf-mark.png';
 import './index.css';
 
 export default function App() {
   const [session, setSession] = useState(undefined); // undefined = still checking
   const [showShop, setShowShop] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -19,17 +24,32 @@ export default function App() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!session) return;
+    supabase
+      .from('team_members')
+      .select('role')
+      .eq('id', session.user.id)
+      .single()
+      .then(({ data }) => setIsOwner(data?.role === 'owner'));
+  }, [session]);
+
   if (session === undefined) return null; // brief flash-free load
   if (!session) return <Login />;
 
   return (
     <div className="app">
       <header className="app-header">
-        <div className="mark" aria-hidden="true" />
+        <img src={wolfMark} alt="Feral Services" className="mark" />
         <div>
           <h1>Feral Ops</h1>
           <p>The Quest Board — Feral Services</p>
         </div>
+        {isOwner && (
+          <button className="invite-nav-btn" onClick={() => setShowInvite(true)}>
+            Invite
+          </button>
+        )}
         <button className="shop-nav-btn" onClick={() => setShowShop(true)}>
           Shop
         </button>
@@ -42,7 +62,9 @@ export default function App() {
         <Leaderboard />
       </main>
       <AgentPanel />
+      <LevelUpToast />
       {showShop && <Shop onClose={() => setShowShop(false)} />}
+      {showInvite && <InviteTeammateModal onClose={() => setShowInvite(false)} />}
     </div>
   );
 }
