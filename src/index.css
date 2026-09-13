@@ -1,0 +1,400 @@
+/* Feral Ops design tokens
+   Palette pulls from the stencil-wolf brand: charcoal ground, bone text,
+   a single rust-red accent for anything that needs attention. */
+:root {
+  --charcoal: #1a1815;
+  --charcoal-raised: #232019;
+  --line: #3a352c;
+  --bone: #e9e3d6;
+  --bone-dim: #a89f8d;
+  --rust: #b4472e;
+  --gem: #4fd1c5;
+  --font-display: 'Bebas Neue', 'Arial Narrow', sans-serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--charcoal);
+  color: var(--bone);
+  font-family: var(--font-body);
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--line);
+}
+
+.mark {
+  width: 40px;
+  height: 40px;
+  background: var(--rust);
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+  flex-shrink: 0;
+}
+
+.app-header h1 {
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  font-size: 34px;
+  margin: 0;
+  line-height: 1;
+}
+
+.app-header p {
+  margin: 4px 0 0;
+  color: var(--bone-dim);
+  font-size: 14px;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .board { grid-template-columns: 1fr; }
+}
+
+.column {
+  background: var(--charcoal-raised);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.column-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bone-dim);
+}
+
+.column-count {
+  color: var(--bone);
+  font-weight: 600;
+}
+
+.column-body {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.column-empty {
+  color: var(--bone-dim);
+  font-size: 13px;
+  padding: 8px 4px;
+}
+
+.job-card {
+  background: var(--charcoal);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--rust);
+  padding: 10px 12px;
+  cursor: grab;
+}
+
+.job-card:active { cursor: grabbing; }
+
+.job-client {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.job-type {
+  color: var(--bone-dim);
+  font-size: 13px;
+  text-transform: capitalize;
+  margin-top: 2px;
+}
+
+.job-deadline {
+  font-size: 12px;
+  color: var(--rust);
+  margin-top: 6px;
+}
+
+.job-notes {
+  font-size: 12px;
+  color: var(--bone-dim);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.board-status {
+  color: var(--bone-dim);
+  padding: 40px 0;
+  text-align: center;
+}
+
+/* Header sign-out button */
+.app-header { position: relative; }
+.signout {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--bone-dim);
+  padding: 8px 14px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.signout:hover { color: var(--bone); border-color: var(--bone-dim); }
+
+/* Login screen */
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--charcoal);
+}
+.login-card {
+  width: 320px;
+  padding: 28px;
+  background: var(--charcoal-raised);
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.login-card h1 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  margin: 8px 0 0;
+}
+.login-card p { color: var(--bone-dim); margin: 0 0 8px; font-size: 14px; }
+.login-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--bone-dim);
+}
+.login-card input {
+  background: var(--charcoal);
+  border: 1px solid var(--line);
+  color: var(--bone);
+  padding: 8px 10px;
+  font-size: 14px;
+}
+.login-card button {
+  background: var(--rust);
+  color: var(--bone);
+  border: none;
+  padding: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 6px;
+}
+.login-card button:disabled { opacity: 0.6; cursor: default; }
+.login-error { color: var(--rust); font-size: 13px; }
+.login-hint { font-size: 12px; color: var(--bone-dim); margin-top: 4px; }
+
+/* Agent panel */
+.agent-panel {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+.agent-toggle {
+  background: var(--rust);
+  color: var(--bone);
+  border: none;
+  padding: 12px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.agent-window {
+  width: 320px;
+  height: 400px;
+  background: var(--charcoal-raised);
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+}
+.agent-thread {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.agent-empty { color: var(--bone-dim); font-size: 13px; }
+.agent-msg {
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: 2px;
+  max-width: 85%;
+  line-height: 1.4;
+}
+.agent-msg.user {
+  align-self: flex-end;
+  background: var(--rust);
+  color: var(--bone);
+}
+.agent-msg.agent {
+  align-self: flex-start;
+  background: var(--charcoal);
+  border: 1px solid var(--line);
+}
+.agent-input-row {
+  display: flex;
+  border-top: 1px solid var(--line);
+}
+.agent-input-row input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--bone);
+  padding: 10px;
+  font-size: 13px;
+}
+.agent-input-row input:focus { outline: none; }
+.agent-input-row button {
+  background: transparent;
+  border: none;
+  color: var(--rust);
+  font-weight: 600;
+  padding: 0 14px;
+  cursor: pointer;
+}
+
+/* Layout: board + party sidebar */
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 1000px) {
+  .main-layout { grid-template-columns: 1fr; }
+}
+
+/* Rarity accents on quest cards */
+.rarity-common { border-left-color: #7c7361; }
+.rarity-rare { border-left-color: #3d7ab0; }
+.rarity-epic { border-left-color: #8a4fc9; }
+.rarity-legendary { border-left-color: #d4a017; }
+
+.job-top-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--bone-dim);
+  margin-bottom: 6px;
+}
+.job-xp { color: var(--rust); font-weight: 600; }
+.job-rewards { display: flex; gap: 8px; }
+.job-gems { color: var(--gem); font-weight: 600; }
+
+.job-progress {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.job-progress-bar {
+  flex: 1;
+  height: 5px;
+  background: var(--charcoal);
+  border: 1px solid var(--line);
+}
+.job-progress-fill {
+  height: 100%;
+  background: var(--rust);
+}
+.job-progress-label {
+  font-size: 11px;
+  color: var(--bone-dim);
+  white-space: nowrap;
+}
+
+.objective-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 8px 0 0;
+  border-top: 1px dashed var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.objective-list label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.objective-list .done {
+  color: var(--bone-dim);
+  text-decoration: line-through;
+}
+
+/* Party leaderboard */
+.leaderboard {
+  background: var(--charcoal-raised);
+  border: 1px solid var(--line);
+  padding: 14px;
+}
+.leaderboard h2 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  margin: 0 0 12px;
+  color: var(--bone-dim);
+}
+.member-row { margin-bottom: 14px; }
+.member-row:last-child { margin-bottom: 0; }
+.member-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.member-name { font-weight: 600; }
+.member-level { color: var(--rust); font-weight: 600; }
+.xp-bar {
+  height: 5px;
+  background: var(--charcoal);
+  border: 1px solid var(--line);
+}
+.xp-bar-fill { height: 100%; background: var(--rust); }
+.member-xp { color: var(--bone-dim); }
+.member-gems { color: var(--gem); font-weight: 600; }
+.member-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-top: 3px;
+}
