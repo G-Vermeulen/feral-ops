@@ -2,10 +2,15 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import Groq from 'groq-sdk';
+import { createClient } from '@supabase/supabase-js';
 import { toolDefinitions, runTool } from './tools.js';
 import { rotateShop } from './shopRotation.js';
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const supabaseAdmin = createClient(
+  process.env.VITE_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 const MODEL = 'openai/gpt-oss-20b'; // confirmed available + tool-calling on this Groq account
 
 const app = express();
@@ -14,6 +19,45 @@ const app = express();
 // Vercel URL so only your own board can call this server.
 const allowedOrigin = process.env.FRONTEND_ORIGIN;
 app.use(cors(allowedOrigin ? { origin: allowedOrigin } : {}));
+app.post('/admin/invite-teammate', async (req, res) => {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  if (!token) return res.status(401).json({ error: 'Missing session token' });
+
+  const { data: userResult, error: userErr } = await supabaseAdmin.auth.getUser(token);
+  if (userErr || !userResult?.user) {
+    return res.status(401).json({ error: 'Invalid or expired session' });
+  }
+
+  const { data: requester } = await supabaseAdmin
+    .from('team_members')
+    .select('role')
+    .eq('id', userResult.user.id)
+    .single();
+  if (requester?.role !== 'owner') {
+    return res.status(403).json({ error: 'Only the owner can invite teammates' });
+  }
+
+  const { email, display_name } = req.body;
+  if (!email || !display_name) {
+    return res.status(400).json({ error: 'email and display_name are required' });
+  }
+
+  const { data: invited, error: inviteErr } = await supabaseAdmin.auth.admin.inviteUserByEmail(email);
+  if (inviteErr) {
+    return res.status(500).json({ error: inviteErr.message });
+  }
+
+  const { error: insertErr } = await supabaseAdmin
+    .from('team_members')
+    .insert({ id: invited.user.id, display_name, role: 'designer' });
+  if (insertErr) {
+    return res.status(500).json({ error: insertErr.message });
+  }
+
+  res.json({ ok: true });
+});
+
 app.use(express.json());
 
 // Triggered weekly by a free external scheduler (e.g. cron-job.org) hitting this
