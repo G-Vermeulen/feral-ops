@@ -18,8 +18,10 @@ app.use(express.json());
 
 // Triggered weekly by a free external scheduler (e.g. cron-job.org) hitting this
 // URL with the shared secret — keeps the rotation genuinely free (no Render cron cost).
-app.post('/admin/rotate-shop', async (req, res) => {
-  const secret = req.headers['x-rotation-secret'];
+// Accepts either a POST with an X-Rotation-Secret header, or a plain GET with
+// ?secret=... in the URL (so it can be triggered from a browser or a simple scheduler).
+async function handleRotate(req, res) {
+  const secret = req.headers['x-rotation-secret'] || req.query.secret;
   if (!process.env.ROTATION_SECRET || secret !== process.env.ROTATION_SECRET) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -30,7 +32,10 @@ app.post('/admin/rotate-shop', async (req, res) => {
     console.error('Shop rotation failed:', err);
     res.status(500).json({ error: err.message });
   }
-});
+}
+
+app.post('/admin/rotate-shop', handleRotate);
+app.get('/admin/rotate-shop', handleRotate);
 
 const SYSTEM_PROMPT = `You are the Questmaster for Feral Services — you help Wolf and his party
 manage quests (design jobs): posting new quests, moving them through the board
