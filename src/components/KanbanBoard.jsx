@@ -25,6 +25,9 @@ export default function KanbanBoard() {
   const [dragJobId, setDragJobId] = useState(null);
   const [expanded, setExpanded] = useState(null);
   const [showNewQuest, setShowNewQuest] = useState(false);
+  const [newObjectiveText, setNewObjectiveText] = useState({}); // jobId -> draft text
+  const [searchText, setSearchText] = useState('');
+  const [difficultyFilter, setDifficultyFilter] = useState('all');
 
   const loadJobs = useCallback(async () => {
     const { data, error } = await supabase
@@ -72,7 +75,14 @@ export default function KanbanBoard() {
     return () => supabase.removeChannel(channel);
   }, [loadJobs, loadTasks, loadMembers]);
 
-  const visibleJobs = jobs.filter((j) => j.status !== 'cancelled');
+  const visibleJobs = jobs
+    .filter((j) => j.status !== 'cancelled')
+    .filter((j) => difficultyFilter === 'all' || j.difficulty === difficultyFilter)
+    .filter((j) => {
+      if (!searchText.trim()) return true;
+      const q = searchText.trim().toLowerCase();
+      return j.client_name.toLowerCase().includes(q) || j.job_type.toLowerCase().includes(q);
+    });
 
   const moveJob = async (jobId, newStatus) => {
     setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, status: newStatus } : j)));
@@ -142,11 +152,38 @@ export default function KanbanBoard() {
     await supabase.from('tasks').update({ done: !task.done }).eq('id', task.id);
   };
 
+  const addObjective = async (jobId) => {
+    const title = (newObjectiveText[jobId] || '').trim();
+    if (!title) return;
+    setNewObjectiveText((prev) => ({ ...prev, [jobId]: '' }));
+    const { error } = await supabase.from('tasks').insert({ job_id: jobId, title });
+    if (error) console.error('Failed to add objective', error);
+    else loadTasks();
+  };
+
   if (loading) return <div className="board-status">Consulting the quest board…</div>;
 
   return (
     <div className="board-wrap">
       <div className="board-toolbar">
+        <input
+          type="text"
+          className="board-search"
+          placeholder="Search by client or type…"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+        />
+        <select
+          className="board-filter"
+          value={difficultyFilter}
+          onChange={(e) => setDifficultyFilter(e.target.value)}
+        >
+          <option value="all">All difficulties</option>
+          <option value="common">Common</option>
+          <option value="rare">Rare</option>
+          <option value="epic">Epic</option>
+          <option value="legendary">Legendary</option>
+        </select>
         <button className="new-quest-btn" onClick={() => setShowNewQuest(true)}>
           + Post a Quest
         </button>
@@ -276,6 +313,18 @@ export default function KanbanBoard() {
                               ))}
                             </ul>
                           )}
+                          <div className="add-objective-row">
+                            <input
+                              type="text"
+                              placeholder="Add an objective…"
+                              value={newObjectiveText[job.id] || ''}
+                              onChange={(e) =>
+                                setNewObjectiveText((prev) => ({ ...prev, [job.id]: e.target.value }))
+                              }
+                              onKeyDown={(e) => e.key === 'Enter' && addObjective(job.id)}
+                            />
+                            <button onClick={() => addObjective(job.id)}>+</button>
+                          </div>
                         </div>
                       )}
                     </div>
