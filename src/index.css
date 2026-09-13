@@ -212,6 +212,20 @@ body {
   gap: 6px;
 }
 .shop-item.equipped { border-color: var(--gem); }
+.rarity-tag-common { border-left: 3px solid #7c7361; }
+.rarity-tag-rare { border-left: 3px solid #3d7ab0; }
+.rarity-tag-epic { border-left: 3px solid #8a4fc9; }
+.rarity-tag-legendary { border-left: 3px solid #d4a017; }
+.rarity-text-common { color: #a89f8d; }
+.rarity-text-rare { color: #6fa8dc; }
+.rarity-text-epic { color: #b285e0; }
+.rarity-text-legendary { color: #d4a017; }
+.shop-rarity-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
 .shop-item-top {
   display: flex;
   justify-content: space-between;
