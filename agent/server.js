@@ -5,7 +5,7 @@ import Groq from 'groq-sdk';
 import { toolDefinitions, runTool } from './tools.js';
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-const MODEL = 'llama-3.3-70b-versatile'; // free tier on Groq
+const MODEL = 'llama-3.1-8b-instant'; // free tier on Groq
 
 const app = express();
 
