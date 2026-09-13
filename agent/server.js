@@ -5,7 +5,7 @@ import Groq from 'groq-sdk';
 import { toolDefinitions, runTool } from './tools.js';
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-const MODEL = 'llama-3.1-8b-instant'; // free tier on Groq
+const MODEL = 'openai/gpt-oss-20b'; // confirmed available + tool-calling on this Groq account
 
 const app = express();
 
@@ -14,15 +14,6 @@ const app = express();
 const allowedOrigin = process.env.FRONTEND_ORIGIN;
 app.use(cors(allowedOrigin ? { origin: allowedOrigin } : {}));
 app.use(express.json());
-
-app.get('/debug/models', async (req, res) => {
-  try {
-    const models = await groq.models.list();
-    res.json(models);
-  } catch (err) {
-    res.status(500).json({ error: err.message, status: err.status });
-  }
-});
 
 const SYSTEM_PROMPT = `You are the Questmaster for Feral Services — you help Wolf and his party
 manage quests (design jobs): posting new quests, moving them through the board
