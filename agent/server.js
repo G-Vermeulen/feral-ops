@@ -15,6 +15,15 @@ const allowedOrigin = process.env.FRONTEND_ORIGIN;
 app.use(cors(allowedOrigin ? { origin: allowedOrigin } : {}));
 app.use(express.json());
 
+app.get('/debug/models', async (req, res) => {
+  try {
+    const models = await groq.models.list();
+    res.json(models);
+  } catch (err) {
+    res.status(500).json({ error: err.message, status: err.status });
+  }
+});
+
 const SYSTEM_PROMPT = `You are the Questmaster for Feral Services — you help Wolf and his party
 manage quests (design jobs): posting new quests, moving them through the board
 (Unclaimed -> In Progress -> Awaiting Judgement -> Completed), and reporting on
