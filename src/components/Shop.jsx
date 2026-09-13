@@ -4,12 +4,23 @@ import { supabase } from '../lib/supabaseClient';
 const RARITY_LABEL = { common: 'Common', rare: 'Rare', epic: 'Epic', legendary: 'Legendary' };
 const RARITY_ORDER = { legendary: 0, epic: 1, rare: 2, common: 3 };
 
+function formatCountdown(msRemaining) {
+  if (msRemaining <= 0) return 'Rotating soon…';
+  const totalSeconds = Math.floor(msRemaining / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+}
+
 export default function Shop({ onClose }) {
   const [activeItems, setActiveItems] = useState([]); // current rotation, buyable
   const [ownedItems, setOwnedItems] = useState([]); // everything the player owns, any rotation
   const [ownedIds, setOwnedIds] = useState(new Set());
   const [me, setMe] = useState(null);
   const [rotationWeek, setRotationWeek] = useState(null);
+  const [countdown, setCountdown] = useState('');
   const [error, setError] = useState('');
   const [busyId, setBusyId] = useState(null);
 
@@ -35,6 +46,17 @@ export default function Shop({ onClose }) {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    if (!rotationWeek) return;
+    const nextRotation = new Date(`${rotationWeek}T00:00:00Z`);
+    nextRotation.setUTCDate(nextRotation.getUTCDate() + 7);
+
+    const tick = () => setCountdown(formatCountdown(nextRotation - new Date()));
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [rotationWeek]);
 
   const buy = async (item) => {
     if (!me || me.gems < item.cost || ownedIds.has(item.id)) return;
@@ -117,13 +139,13 @@ export default function Shop({ onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card shop-card" onClick={(e) => e.stopPropagation()}>
         <div className="shop-header">
+          <button type="button" className="shop-back-btn" onClick={onClose}>
+            ← Back
+          </button>
           <h2>The Shop</h2>
           <span className="shop-balance">◆ {me.gems}</span>
         </div>
-        <p className="shop-subtitle">
-          Cosmetic only — classes and skills are just flavor, they don't change quests or rewards.
-          {rotationWeek && ` This week's rotation: ${rotationWeek}.`}
-        </p>
+        <div className="shop-countdown">Next rotation in {countdown}</div>
 
         {error && <div className="modal-error">{error}</div>}
 
