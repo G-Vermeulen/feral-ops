@@ -54,7 +54,13 @@ someone:
 
 They log in at the board's URL and see the same live jobs you do.
 
-## Talking to the assistant
+## Posting and claiming quests
+
+- **Post a Quest** button on the board opens a form: Quest Giver, Quest Type, Difficulty, Deadline, Quest Information, and Quest Items (materials/assets needed). No typing to the assistant required.
+- New quests land in **Unclaimed** with no one assigned.
+- Any signed-in team member can tap **Accept Quest** on an unclaimed card — it assigns them and moves the quest straight to **In Progress**. First to claim it gets it.
+- Click a quest card to expand it and see the full briefing, items list, and objectives checklist.
+- The Questmaster (chat assistant) still works for quick asks like "what's overdue?" or posting a quest by voice/text, and now supports quest items too — but the form is the faster path for day-to-day use.
 
 There's now a floating "Ask the assistant" button in the bottom-right of the
 board. It calls the agent server directly — make sure `npm run agent` is
