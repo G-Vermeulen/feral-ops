@@ -19,6 +19,8 @@ const app = express();
 // Vercel URL so only your own board can call this server.
 const allowedOrigin = process.env.FRONTEND_ORIGIN;
 app.use(cors(allowedOrigin ? { origin: allowedOrigin } : {}));
+app.use(express.json());
+
 app.post('/admin/invite-teammate', async (req, res) => {
   const authHeader = req.headers.authorization || '';
   const token = authHeader.replace(/^Bearer\s+/i, '');
@@ -57,8 +59,6 @@ app.post('/admin/invite-teammate', async (req, res) => {
 
   res.json({ ok: true });
 });
-
-app.use(express.json());
 
 // Triggered weekly by a free external scheduler (e.g. cron-job.org) hitting this
 // URL with the shared secret — keeps the rotation genuinely free (no Render cron cost).
