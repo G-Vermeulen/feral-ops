@@ -38,11 +38,14 @@ body {
 }
 
 .mark {
-  width: 40px;
-  height: 40px;
-  background: var(--rust);
-  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+  height: 44px;
+  width: auto;
   flex-shrink: 0;
+  object-fit: contain;
+}
+.login-mark {
+  height: 90px;
+  align-self: center;
 }
 
 .app-header h1 {
@@ -174,6 +177,43 @@ body {
   cursor: pointer;
 }
 .shop-nav-btn:hover { opacity: 0.9; }
+
+.invite-nav-btn {
+  background: transparent;
+  border: 1px solid var(--rust);
+  color: var(--rust);
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.invite-nav-btn:hover { background: var(--rust); color: var(--bone); }
+
+/* Level-up toast */
+.levelup-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--charcoal-raised);
+  border: 2px solid var(--gem);
+  padding: 14px 22px;
+  text-align: center;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  animation: levelup-pop 0.3s ease-out;
+}
+.levelup-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 0.05em;
+  color: var(--gem);
+}
+.levelup-body { font-size: 14px; margin-top: 2px; }
+@keyframes levelup-pop {
+  0% { transform: translateX(-50%) scale(0.8); opacity: 0; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
 
 /* Shop modal */
 .shop-card { max-width: 560px; }
@@ -468,6 +508,28 @@ body {
   color: var(--bone-dim);
   text-decoration: line-through;
 }
+.add-objective-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+.add-objective-row input {
+  flex: 1;
+  background: var(--charcoal);
+  border: 1px solid var(--line);
+  color: var(--bone);
+  padding: 6px 8px;
+  font-size: 12px;
+}
+.add-objective-row button {
+  background: var(--rust);
+  color: var(--bone);
+  border: none;
+  padding: 0 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 2px;
+}
 
 /* Party leaderboard */
 .leaderboard {
@@ -516,8 +578,25 @@ body {
 /* Toolbar + New Quest button */
 .board-toolbar {
   display: flex;
-  justify-content: flex-end;
+  gap: 10px;
   margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.board-search {
+  flex: 1;
+  min-width: 160px;
+  background: var(--charcoal-raised);
+  border: 1px solid var(--line);
+  color: var(--bone);
+  padding: 10px 12px;
+  font-size: 13px;
+}
+.board-filter {
+  background: var(--charcoal-raised);
+  border: 1px solid var(--line);
+  color: var(--bone);
+  padding: 10px 12px;
+  font-size: 13px;
 }
 .new-quest-btn {
   background: var(--rust);
