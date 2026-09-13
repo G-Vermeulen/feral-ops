@@ -398,3 +398,131 @@ body {
   font-size: 11px;
   margin-top: 3px;
 }
+
+/* Toolbar + New Quest button */
+.board-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
+.new-quest-btn {
+  background: var(--rust);
+  color: var(--bone);
+  border: none;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+/* Claim status on quest cards */
+.job-owner { margin-top: 8px; font-size: 12px; }
+.unclaimed-tag {
+  color: var(--gem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 11px;
+}
+.claimed-tag { color: var(--bone-dim); }
+.accept-btn {
+  margin-top: 8px;
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--rust);
+  color: var(--rust);
+  padding: 6px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.accept-btn:hover { background: var(--rust); color: var(--bone); }
+
+.job-details {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.job-detail-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--bone-dim);
+  margin-bottom: 2px;
+}
+
+/* New Quest modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 50;
+}
+.modal-card {
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--charcoal-raised);
+  border: 1px solid var(--line);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.modal-card h2 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  margin: 0 0 4px;
+}
+.modal-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--bone-dim);
+}
+.modal-card input,
+.modal-card select,
+.modal-card textarea {
+  background: var(--charcoal);
+  border: 1px solid var(--line);
+  color: var(--bone);
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+}
+.modal-error { color: var(--rust); font-size: 13px; }
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+.modal-cancel {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--bone-dim);
+  padding: 10px 14px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.modal-actions button[type="submit"] {
+  background: var(--rust);
+  color: var(--bone);
+  border: none;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.modal-actions button[type="submit"]:disabled { opacity: 0.6; cursor: default; }
