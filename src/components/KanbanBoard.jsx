@@ -111,6 +111,16 @@ export default function KanbanBoard() {
     }
   };
 
+  const returnToProgress = async (job, e) => {
+    e.stopPropagation();
+    setJobs((prev) => prev.map((j) => (j.id === job.id ? { ...j, status: 'in_progress' } : j)));
+    const { error } = await supabase.from('jobs').update({ status: 'in_progress' }).eq('id', job.id);
+    if (error) {
+      console.error('Failed to move quest back', error);
+      loadJobs();
+    }
+  };
+
   const cancelQuest = async (job, e) => {
     e.stopPropagation();
     if (!window.confirm(`Cancel the "${job.job_type}" quest for ${job.client_name}?`)) return;
@@ -199,6 +209,15 @@ export default function KanbanBoard() {
                       {isUnclaimed && currentUserId && (
                         <button className="accept-btn" onClick={(e) => acceptQuest(job, e)}>
                           Accept Quest
+                        </button>
+                      )}
+
+                      {!isUnclaimed && job.status === 'review' && (
+                        <button
+                          className="return-btn"
+                          onClick={(e) => returnToProgress(job, e)}
+                        >
+                          ← Back to In Progress
                         </button>
                       )}
 
