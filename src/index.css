@@ -105,35 +105,49 @@ body {
   .board { grid-template-columns: 1fr; }
 }
 
-/* Each column is a parchment scroll pinned to the board */
+/* Each column is a parchment scroll, rolled around wooden dowels top and bottom,
+   hung slightly imperfectly on the board like something out of a fantasy film. */
 .quest-scroll {
   position: relative;
-  background: linear-gradient(180deg, var(--parchment) 0%, var(--parchment-shadow) 100%);
+  margin-top: 14px;
+  margin-bottom: 14px;
+  background:
+    radial-gradient(ellipse at 20% 15%, rgba(139, 115, 60, 0.25) 0%, transparent 45%),
+    radial-gradient(ellipse at 80% 85%, rgba(139, 100, 50, 0.22) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 40%, rgba(160, 130, 70, 0.15) 0%, transparent 60%),
+    linear-gradient(90deg, rgba(0,0,0,0.10) 0%, transparent 8%, transparent 92%, rgba(0,0,0,0.10) 100%),
+    linear-gradient(180deg, var(--parchment) 0%, var(--parchment-shadow) 100%);
   border: 1px solid #5a4a2e;
   border-radius: 2px;
   min-height: 200px;
   display: flex;
   flex-direction: column;
-  padding-top: 6px;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
-  clip-path: polygon(
-    0% 1%, 4% 0%, 12% 1.5%, 20% 0%, 30% 1%, 40% 0%, 50% 1.2%, 60% 0%, 70% 1%, 80% 0%, 90% 1.5%, 100% 0%,
-    100% 99%, 92% 100%, 82% 98.5%, 72% 100%, 60% 99%, 50% 100%, 40% 98.8%, 30% 100%, 18% 99%, 8% 100%, 0% 99%
-  );
+  padding: 14px 4px 16px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 30px rgba(90, 65, 30, 0.15);
 }
+.quest-scroll:nth-child(1) { transform: rotate(-0.6deg); }
+.quest-scroll:nth-child(2) { transform: rotate(0.4deg); }
+.quest-scroll:nth-child(3) { transform: rotate(-0.3deg); }
+.quest-scroll:nth-child(4) { transform: rotate(0.6deg); }
 
-.scroll-pin {
+/* Wooden dowel caps the "scroll" is rolled around, top and bottom */
+.quest-scroll::before,
+.quest-scroll::after {
+  content: '';
   position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #6b6b6b, #232323 70%);
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.6);
+  left: -12px;
+  right: -12px;
+  height: 16px;
+  border-radius: 9px;
+  background:
+    radial-gradient(circle at 8px 50%, #8a6535 0%, #8a6535 35%, transparent 40%),
+    radial-gradient(circle at calc(100% - 8px) 50%, #8a6535 0%, #8a6535 35%, transparent 40%),
+    linear-gradient(180deg, #7a5a35 0%, #4a3018 55%, #2e1c0d 100%);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.6);
   z-index: 2;
 }
+.quest-scroll::before { top: -10px; }
+.quest-scroll::after { bottom: -10px; }
 
 .column-header {
   display: flex;
