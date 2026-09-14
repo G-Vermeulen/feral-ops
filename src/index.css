@@ -217,6 +217,15 @@ body {
 .seal-rare { background: #3d7ab0; }
 .seal-epic { background: #8a4fc9; }
 .seal-legendary { background: #d4a017; }
+.seal-mythical {
+  background: linear-gradient(135deg, #ff3d9a, #7b2ff7, #ffd23d);
+  box-shadow: 0 0 8px 2px rgba(255, 61, 154, 0.7);
+  animation: mythical-pulse 1.8s ease-in-out infinite;
+}
+@keyframes mythical-pulse {
+  0%, 100% { box-shadow: 0 0 6px 1px rgba(255, 61, 154, 0.6); }
+  50% { box-shadow: 0 0 14px 4px rgba(123, 47, 247, 0.8); }
+}
 
 .job-client {
   font-weight: 700;
@@ -553,6 +562,25 @@ body {
 .rarity-rare { border-left-color: #3d7ab0; }
 .rarity-epic { border-left-color: #8a4fc9; }
 .rarity-legendary { border-left-color: #d4a017; }
+.rarity-mythical {
+  border: 1px solid transparent;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.35), rgba(255,255,255,0.35)),
+    linear-gradient(135deg, #ff3d9a, #7b2ff7, #ffd23d);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+.rarity-common .job-rarity-tag { color: #5a5342; }
+.rarity-rare .job-rarity-tag { color: #1f4e79; }
+.rarity-epic .job-rarity-tag { color: #5c2d8f; }
+.rarity-legendary .job-rarity-tag { color: #8a6200; font-weight: 700; }
+.rarity-mythical .job-rarity-tag {
+  font-weight: 800;
+  background: linear-gradient(135deg, #d6006f, #5b1fa8, #b8860b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 
 .job-top-row {
   display: flex;
