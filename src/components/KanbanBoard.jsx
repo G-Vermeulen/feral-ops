@@ -199,7 +199,6 @@ export default function KanbanBoard() {
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => dragJobId && moveJob(dragJobId, col.key)}
             >
-              <div className="scroll-pin" aria-hidden="true" />
               <div className="column-header">
                 <span>{col.label}</span>
                 <span className="column-count">{colJobs.length}</span>
