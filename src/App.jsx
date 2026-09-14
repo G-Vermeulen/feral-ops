@@ -7,14 +7,21 @@ import AgentPanel from './components/AgentPanel';
 import Shop from './components/Shop';
 import LevelUpToast from './components/LevelUpToast';
 import InviteTeammateModal from './components/InviteTeammateModal';
+import SetPasswordModal from './components/SetPasswordModal';
 import wolfMark from './assets/feral-wolf-mark.png';
 import './index.css';
+
+function arrivedViaInvite() {
+  const hash = window.location.hash || '';
+  return hash.includes('type=invite') || hash.includes('type=recovery');
+}
 
 export default function App() {
   const [session, setSession] = useState(undefined); // undefined = still checking
   const [showShop, setShowShop] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const [needsPassword, setNeedsPassword] = useState(arrivedViaInvite());
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -36,6 +43,17 @@ export default function App() {
 
   if (session === undefined) return null; // brief flash-free load
   if (!session) return <Login />;
+
+  if (needsPassword) {
+    return (
+      <SetPasswordModal
+        onDone={() => {
+          window.history.replaceState(null, '', window.location.pathname);
+          setNeedsPassword(false);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="app">
