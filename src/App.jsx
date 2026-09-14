@@ -57,6 +57,7 @@ export default function App() {
           Sign out
         </button>
       </header>
+      <div className="brand-divider" aria-hidden="true" />
       <main className="main-layout">
         <KanbanBoard />
         <Leaderboard />
