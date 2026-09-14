@@ -195,10 +195,11 @@ export default function KanbanBoard() {
           return (
             <div
               key={col.key}
-              className="column"
+              className="column quest-scroll"
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => dragJobId && moveJob(dragJobId, col.key)}
             >
+              <div className="scroll-pin" aria-hidden="true" />
               <div className="column-header">
                 <span>{col.label}</span>
                 <span className="column-count">{colJobs.length}</span>
@@ -215,12 +216,13 @@ export default function KanbanBoard() {
                   return (
                     <div
                       key={job.id}
-                      className={`job-card rarity-${job.difficulty}`}
+                      className={`job-card parchment-card rarity-${job.difficulty}`}
                       draggable
                       onDragStart={() => setDragJobId(job.id)}
                       onDragEnd={() => setDragJobId(null)}
                       onClick={() => setExpanded(isOpen ? null : job.id)}
                     >
+                      <span className={`wax-seal seal-${job.difficulty}`} aria-hidden="true" />
                       <div className="job-top-row">
                         <span className="job-rarity-tag">{diff.label}</span>
                         <span className="job-rewards">
