@@ -1,7 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
-const DIFFICULTY_XP = { common: [50, 10], rare: [120, 25], epic: [250, 60], legendary: [500, 150] };
+const DIFFICULTY_XP = {
+  common: [50, 10],
+  rare: [120, 25],
+  epic: [250, 60],
+  legendary: [500, 150],
+  mythical: [5000, 1500], // 10x legendary — Questmaster (owner) only
+};
 
 export default function NewQuestModal({ onClose }) {
   const [form, setForm] = useState({
@@ -14,6 +20,20 @@ export default function NewQuestModal({ onClose }) {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [isOwner, setIsOwner] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const uid = data?.user?.id;
+      if (!uid) return;
+      supabase
+        .from('team_members')
+        .select('role')
+        .eq('id', uid)
+        .single()
+        .then(({ data: member }) => setIsOwner(member?.role === 'owner'));
+    });
+  }, []);
 
   const update = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
@@ -82,6 +102,9 @@ export default function NewQuestModal({ onClose }) {
             <option value="rare">Rare — 120 XP, 25 gems</option>
             <option value="epic">Epic — 250 XP, 60 gems</option>
             <option value="legendary">Legendary — 500 XP, 150 gems</option>
+            {isOwner && (
+              <option value="mythical">Mythical — 5000 XP, 1500 gems (Questmaster only)</option>
+            )}
           </select>
         </label>
 
