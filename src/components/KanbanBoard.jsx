@@ -14,6 +14,7 @@ const DIFFICULTY = {
   rare: { label: 'Rare', stars: 2 },
   epic: { label: 'Epic', stars: 3 },
   legendary: { label: 'Legendary', stars: 4 },
+  mythical: { label: 'Mythical', stars: 5 },
 };
 
 export default function KanbanBoard() {
@@ -183,6 +184,7 @@ export default function KanbanBoard() {
           <option value="rare">Rare</option>
           <option value="epic">Epic</option>
           <option value="legendary">Legendary</option>
+          <option value="mythical">Mythical</option>
         </select>
         <button className="new-quest-btn" onClick={() => setShowNewQuest(true)}>
           + Post a Quest
