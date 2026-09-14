@@ -45,7 +45,9 @@ app.post('/admin/invite-teammate', async (req, res) => {
     return res.status(400).json({ error: 'email and display_name are required' });
   }
 
-  const { data: invited, error: inviteErr } = await supabaseAdmin.auth.admin.inviteUserByEmail(email);
+  const { data: invited, error: inviteErr } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+    redirectTo: 'https://feral-ops-board.onrender.com',
+  });
   if (inviteErr) {
     return res.status(500).json({ error: inviteErr.message });
   }
