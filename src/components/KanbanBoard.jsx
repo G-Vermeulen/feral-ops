@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import NewQuestModal from './NewQuestModal';
+import QuestDetailModal from './QuestDetailModal';
+import { DIFFICULTY } from './difficultyMeta';
 
 const COLUMNS = [
   { key: 'todo', label: 'Unclaimed' },
@@ -9,14 +11,6 @@ const COLUMNS = [
   { key: 'done', label: 'Completed' },
 ];
 
-const DIFFICULTY = {
-  common: { label: 'Common', stars: 1 },
-  rare: { label: 'Rare', stars: 2 },
-  epic: { label: 'Epic', stars: 3 },
-  legendary: { label: 'Legendary', stars: 4 },
-  mythical: { label: 'Mythical', stars: 5 },
-};
-
 export default function KanbanBoard() {
   const [jobs, setJobs] = useState([]);
   const [tasksByJob, setTasksByJob] = useState({});
@@ -24,7 +18,7 @@ export default function KanbanBoard() {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dragJobId, setDragJobId] = useState(null);
-  const [expanded, setExpanded] = useState(null);
+  const [detailJobId, setDetailJobId] = useState(null); // enlarged scroll view
   const [showNewQuest, setShowNewQuest] = useState(false);
   const [newObjectiveText, setNewObjectiveText] = useState({}); // jobId -> draft text
   const [searchText, setSearchText] = useState('');
@@ -95,7 +89,7 @@ export default function KanbanBoard() {
   };
 
   const acceptQuest = async (job, e) => {
-    e.stopPropagation();
+    e?.stopPropagation?.();
     if (!currentUserId) return;
     setJobs((prev) =>
       prev.map((j) =>
@@ -113,17 +107,18 @@ export default function KanbanBoard() {
   };
 
   const completeQuest = async (job, e) => {
-    e.stopPropagation();
+    e?.stopPropagation?.();
     setJobs((prev) => prev.map((j) => (j.id === job.id ? { ...j, status: 'done' } : j)));
     const { error } = await supabase.from('jobs').update({ status: 'done' }).eq('id', job.id);
     if (error) {
       console.error('Failed to complete quest', error);
       loadJobs();
     }
+    setDetailJobId(null);
   };
 
   const returnToProgress = async (job, e) => {
-    e.stopPropagation();
+    e?.stopPropagation?.();
     setJobs((prev) => prev.map((j) => (j.id === job.id ? { ...j, status: 'in_progress' } : j)));
     const { error } = await supabase.from('jobs').update({ status: 'in_progress' }).eq('id', job.id);
     if (error) {
@@ -133,7 +128,7 @@ export default function KanbanBoard() {
   };
 
   const cancelQuest = async (job, e) => {
-    e.stopPropagation();
+    e?.stopPropagation?.();
     if (!window.confirm(`Cancel the "${job.job_type}" quest for ${job.client_name}?`)) return;
     setJobs((prev) => prev.map((j) => (j.id === job.id ? { ...j, status: 'cancelled' } : j)));
     const { error } = await supabase.from('jobs').update({ status: 'cancelled' }).eq('id', job.id);
@@ -141,6 +136,7 @@ export default function KanbanBoard() {
       console.error('Failed to cancel quest', error);
       loadJobs();
     }
+    setDetailJobId(null);
   };
 
   const toggleObjective = async (task) => {
@@ -163,6 +159,8 @@ export default function KanbanBoard() {
   };
 
   if (loading) return <div className="board-status">Consulting the quest board…</div>;
+
+  const detailJob = detailJobId ? jobs.find((j) => j.id === detailJobId) : null;
 
   return (
     <div className="board-wrap">
@@ -197,7 +195,7 @@ export default function KanbanBoard() {
           return (
             <div
               key={col.key}
-              className="column quest-scroll"
+              className="column"
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => dragJobId && moveJob(dragJobId, col.key)}
             >
@@ -211,7 +209,6 @@ export default function KanbanBoard() {
                   const diff = DIFFICULTY[job.difficulty] || DIFFICULTY.common;
                   const objectives = tasksByJob[job.id] || [];
                   const doneCount = objectives.filter((t) => t.done).length;
-                  const isOpen = expanded === job.id;
                   const isUnclaimed = !job.assigned_to;
 
                   return (
@@ -221,7 +218,7 @@ export default function KanbanBoard() {
                       draggable
                       onDragStart={() => setDragJobId(job.id)}
                       onDragEnd={() => setDragJobId(null)}
-                      onClick={() => setExpanded(isOpen ? null : job.id)}
+                      onClick={() => setDetailJobId(job.id)}
                     >
                       <span className={`wax-seal seal-${job.difficulty}`} aria-hidden="true" />
                       <div className="job-top-row">
@@ -286,50 +283,7 @@ export default function KanbanBoard() {
                         </div>
                       )}
 
-                      {isOpen && (
-                        <div className="job-details" onClick={(e) => e.stopPropagation()}>
-                          {job.notes && (
-                            <div className="job-detail-block">
-                              <div className="job-detail-label">Quest Info</div>
-                              <div className="job-notes">{job.notes}</div>
-                            </div>
-                          )}
-                          {job.items && (
-                            <div className="job-detail-block">
-                              <div className="job-detail-label">Quest Items</div>
-                              <div className="job-notes">{job.items}</div>
-                            </div>
-                          )}
-                          {objectives.length > 0 && (
-                            <ul className="objective-list">
-                              {objectives.map((t) => (
-                                <li key={t.id}>
-                                  <label>
-                                    <input
-                                      type="checkbox"
-                                      checked={t.done}
-                                      onChange={() => toggleObjective(t)}
-                                    />
-                                    <span className={t.done ? 'done' : ''}>{t.title}</span>
-                                  </label>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                          <div className="add-objective-row">
-                            <input
-                              type="text"
-                              placeholder="Add an objective…"
-                              value={newObjectiveText[job.id] || ''}
-                              onChange={(e) =>
-                                setNewObjectiveText((prev) => ({ ...prev, [job.id]: e.target.value }))
-                              }
-                              onKeyDown={(e) => e.key === 'Enter' && addObjective(job.id)}
-                            />
-                            <button onClick={() => addObjective(job.id)}>+</button>
-                          </div>
-                        </div>
-                      )}
+                      <div className="scroll-tap-hint">Tap to open scroll</div>
                     </div>
                   );
                 })}
@@ -340,6 +294,26 @@ export default function KanbanBoard() {
       </div>
 
       {showNewQuest && <NewQuestModal onClose={() => setShowNewQuest(false)} />}
+
+      {detailJob && (
+        <QuestDetailModal
+          job={detailJob}
+          objectives={tasksByJob[detailJob.id] || []}
+          memberName={members[detailJob.assigned_to]}
+          currentUserId={currentUserId}
+          newObjectiveText={newObjectiveText[detailJob.id]}
+          onChangeObjectiveText={(text) =>
+            setNewObjectiveText((prev) => ({ ...prev, [detailJob.id]: text }))
+          }
+          onAddObjective={() => addObjective(detailJob.id)}
+          onToggleObjective={toggleObjective}
+          onAccept={acceptQuest}
+          onComplete={completeQuest}
+          onCancel={cancelQuest}
+          onReturn={returnToProgress}
+          onClose={() => setDetailJobId(null)}
+        />
+      )}
     </div>
   );
 }
