@@ -105,65 +105,35 @@ body {
   .board { grid-template-columns: 1fr; }
 }
 
-/* Each column is a parchment scroll, rolled around wooden dowels top and bottom,
-   hung slightly imperfectly on the board like something out of a fantasy film. */
-.quest-scroll {
+/* Each column is a simple recessed panel on the wood board — the individual
+   quests hanging inside are the actual "scrolls" (see .parchment-card below) */
+.column {
   position: relative;
-  margin-top: 14px;
-  margin-bottom: 14px;
-  background:
-    radial-gradient(ellipse at 20% 15%, rgba(139, 115, 60, 0.25) 0%, transparent 45%),
-    radial-gradient(ellipse at 80% 85%, rgba(139, 100, 50, 0.22) 0%, transparent 50%),
-    radial-gradient(ellipse at 60% 40%, rgba(160, 130, 70, 0.15) 0%, transparent 60%),
-    linear-gradient(90deg, rgba(0,0,0,0.10) 0%, transparent 8%, transparent 92%, rgba(0,0,0,0.10) 100%),
-    linear-gradient(180deg, var(--parchment) 0%, var(--parchment-shadow) 100%);
-  border: 1px solid #5a4a2e;
-  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  border-radius: 3px;
   min-height: 200px;
   display: flex;
   flex-direction: column;
-  padding: 14px 4px 16px;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 30px rgba(90, 65, 30, 0.15);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
 }
-.quest-scroll:nth-child(1) { transform: rotate(-0.6deg); }
-.quest-scroll:nth-child(2) { transform: rotate(0.4deg); }
-.quest-scroll:nth-child(3) { transform: rotate(-0.3deg); }
-.quest-scroll:nth-child(4) { transform: rotate(0.6deg); }
-
-/* Wooden dowel caps the "scroll" is rolled around, top and bottom */
-.quest-scroll::before,
-.quest-scroll::after {
-  content: '';
-  position: absolute;
-  left: -12px;
-  right: -12px;
-  height: 16px;
-  border-radius: 9px;
-  background:
-    radial-gradient(circle at 8px 50%, #8a6535 0%, #8a6535 35%, transparent 40%),
-    radial-gradient(circle at calc(100% - 8px) 50%, #8a6535 0%, #8a6535 35%, transparent 40%),
-    linear-gradient(180deg, #7a5a35 0%, #4a3018 55%, #2e1c0d 100%);
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.6);
-  z-index: 2;
-}
-.quest-scroll::before { top: -10px; }
-.quest-scroll::after { bottom: -10px; }
 
 .column-header {
   display: flex;
   justify-content: space-between;
-  padding: 16px 14px 10px;
+  padding: 12px 14px;
   font-family: var(--font-display);
   font-size: 16px;
   letter-spacing: 0.05em;
-  color: var(--ink);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+  color: var(--bone);
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .column-count {
-  color: var(--ink);
+  color: var(--bone);
   font-weight: 700;
-  background: rgba(43, 34, 22, 0.12);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 50%;
   min-width: 22px;
   height: 22px;
@@ -174,44 +144,81 @@ body {
 }
 
 .column-body {
-  padding: 6px 10px 16px;
+  padding: 20px 14px 26px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 30px;
   flex: 1;
 }
 
 .column-empty {
-  color: var(--ink);
-  opacity: 0.5;
+  color: var(--bone-dim);
   font-size: 13px;
   font-style: italic;
   padding: 8px 4px;
 }
 
-/* Quest cards: individual notes on the scroll */
+/* Each quest is its own hung scroll: real parchment texture, rolled around
+   wooden dowels top and bottom, sitting at a slight hand-hung tilt. */
 .parchment-card {
   position: relative;
-  background: rgba(255, 255, 255, 0.35);
-  border: 1px dashed #8a7a54;
-  border-left: none;
+  background-image:
+    linear-gradient(rgba(255, 250, 235, 0.12), rgba(255, 250, 235, 0.12)),
+    url('./assets/parchment-texture.jpg');
+  background-size: 100% 100%, 260px 220px;
+  background-repeat: no-repeat, repeat;
+  border: 1px solid #4a3a22;
   border-radius: 1px;
-  padding: 10px 12px;
-  cursor: grab;
+  padding: 14px 14px 12px;
+  margin: 12px 6px;
+  cursor: pointer;
   color: var(--ink);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.55);
 }
-
+.parchment-card:nth-child(3n+1) { transform: rotate(-0.7deg); }
+.parchment-card:nth-child(3n+2) { transform: rotate(0.5deg); }
+.parchment-card:nth-child(3n+3) { transform: rotate(-0.3deg); }
 .parchment-card:active { cursor: grabbing; }
+
+/* Wooden dowel caps the scroll is rolled around */
+.parchment-card::before,
+.parchment-card::after {
+  content: '';
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  height: 13px;
+  border-radius: 7px;
+  background:
+    radial-gradient(circle at 7px 50%, #8a6535 0%, #8a6535 35%, transparent 40%),
+    radial-gradient(circle at calc(100% - 7px) 50%, #8a6535 0%, #8a6535 35%, transparent 40%),
+    linear-gradient(180deg, #7a5a35 0%, #4a3018 55%, #2e1c0d 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  z-index: 1;
+}
+.parchment-card::before { top: -8px; }
+.parchment-card::after { bottom: -8px; }
+
+.scroll-tap-hint {
+  margin-top: 8px;
+  font-size: 10px;
+  text-align: center;
+  color: var(--ink);
+  opacity: 0.45;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
 
 .wax-seal {
   position: absolute;
-  top: -6px;
-  right: 10px;
+  top: -4px;
+  right: 12px;
   width: 16px;
   height: 16px;
   border-radius: 50%;
   border: 1px solid rgba(0, 0, 0, 0.3);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  z-index: 2;
 }
 .seal-common { background: #7c7361; }
 .seal-rare { background: #3d7ab0; }
@@ -563,12 +570,8 @@ body {
 .rarity-epic { border-left-color: #8a4fc9; }
 .rarity-legendary { border-left-color: #d4a017; }
 .rarity-mythical {
-  border: 1px solid transparent;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.35), rgba(255,255,255,0.35)),
-    linear-gradient(135deg, #ff3d9a, #7b2ff7, #ffd23d);
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
+  border: 2px solid #b8860b;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.55), 0 0 0 2px #ff3d9a, 0 0 16px 4px rgba(123, 47, 247, 0.7);
 }
 .rarity-common .job-rarity-tag { color: #5a5342; }
 .rarity-rare .job-rarity-tag { color: #1f4e79; }
@@ -849,6 +852,67 @@ body {
   font-family: var(--font-display);
   font-size: 22px;
   margin: 0 0 4px;
+}
+
+/* Enlarged scroll — opened by tapping a quest card to read full details */
+.scroll-detail {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 88vh;
+  overflow-y: auto;
+  color: var(--ink);
+  background-image:
+    linear-gradient(rgba(255, 250, 235, 0.12), rgba(255, 250, 235, 0.12)),
+    url('./assets/parchment-texture.jpg');
+  background-size: 100% 100%, 260px 220px;
+  background-repeat: no-repeat, repeat;
+  border: 1px solid #4a3a22;
+  border-radius: 2px;
+  padding: 30px 24px 24px;
+  margin: 16px 8px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+}
+.scroll-detail::before,
+.scroll-detail::after {
+  content: '';
+  position: absolute;
+  left: -14px;
+  right: -14px;
+  height: 22px;
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 11px 50%, #8a6535 0%, #8a6535 38%, transparent 42%),
+    radial-gradient(circle at calc(100% - 11px) 50%, #8a6535 0%, #8a6535 38%, transparent 42%),
+    linear-gradient(180deg, #7a5a35 0%, #4a3018 55%, #2e1c0d 100%);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
+  z-index: 1;
+}
+.scroll-detail::before { top: -16px; }
+.scroll-detail::after { bottom: -16px; }
+
+.scroll-detail-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(43, 34, 22, 0.15);
+  border: none;
+  color: var(--ink);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 2;
+}
+.scroll-detail-close:hover { background: rgba(43, 34, 22, 0.3); }
+
+.scroll-detail-title {
+  font-family: var(--font-display);
+  font-size: 30px;
+  letter-spacing: 0.02em;
+  margin: 4px 0 0;
+  color: var(--ink);
 }
 .modal-card label {
   display: flex;
