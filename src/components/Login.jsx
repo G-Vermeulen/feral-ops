@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import wolfMark from '../assets/feral-wolf-mark.png';
 
-export default function Login() {
-  const [email, setEmail] = useState('');
+export default function Login({ onSwitchToSignup }) {
+  const [identifier, setIdentifier] = useState(''); // animal name OR full email
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -12,6 +12,12 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    // Animal-name accounts use a synthetic email under the hood; real emails
+    // (e.g. the owner's) still work as typed.
+    const trimmed = identifier.trim();
+    const email = trimmed.includes('@') ? trimmed : `${trimmed.toLowerCase()}@feral-ops.local`;
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) setError(error.message);
     setLoading(false);
@@ -25,11 +31,11 @@ export default function Login() {
         <p>Sign in to see the board.</p>
 
         <label>
-          Email
+          Animal Name or Email
           <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
             required
           />
         </label>
@@ -51,7 +57,10 @@ export default function Login() {
         </button>
 
         <p className="login-hint">
-          No account yet? Ask Wolf to add you in Supabase &gt; Authentication &gt; Users.
+          No account yet?{' '}
+          <a href="#" onClick={(e) => { e.preventDefault(); onSwitchToSignup(); }}>
+            Create one
+          </a>
         </p>
       </form>
     </div>
