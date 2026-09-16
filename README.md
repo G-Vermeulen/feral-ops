@@ -71,44 +71,36 @@ running (or deployed) and `VITE_AGENT_URL` points at it. Try:
 
 Every job it touches updates on the board live for anyone watching.
 
-## Going live (Vercel + Railway)
+## Live deployment
 
-The board and the agent are two separate deployments — a static frontend and a
-small always-on server.
+Both pieces are deployed on **Render**, from this same GitHub repo:
 
-**1. Push this folder to a GitHub repo** (Vercel and Railway both deploy from git):
-```
-git init
-git add .
-git commit -m "Feral Ops"
-gh repo create feral-ops --private --source=. --push
-```
-(or create the repo on GitHub's site and `git remote add origin ...` + `git push`)
+- **Board** (static site): https://feral-ops-board.onrender.com
+- **Agent** (web service): https://feral-ops-agent.onrender.com
 
-**2. Deploy the board to Vercel:**
-- vercel.com > New Project > import the repo
-- It auto-detects Vite (via `vercel.json`) — no config needed
-- Add environment variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and
-  `VITE_AGENT_URL` (you'll fill this in after step 3)
-- Deploy — you'll get a URL like `feral-ops.vercel.app`
+Repo is linked to Render by URL rather than through Render's GitHub App, so
+**auto-deploy on push does not fire** — after pushing a change, trigger a
+manual deploy from the Render dashboard (or ask Claude, if using the Render
+connector, to call `trigger_deploy` for the relevant service).
 
-**3. Deploy the agent to Railway:**
-- railway.app > New Project > deploy from the same GitHub repo
-- It auto-detects Node and uses `railway.json` to run `npm run start`
-- Add environment variables: `GROQ_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
-  `VITE_SUPABASE_URL`, and `FRONTEND_ORIGIN` (your Vercel URL from step 2)
-- Deploy — you'll get a URL like `feral-ops-agent.up.railway.app`
+Environment variables already set on each service:
+- **Board:** `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_AGENT_URL`
+- **Agent:** `GROQ_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `VITE_SUPABASE_URL`,
+  `FRONTEND_ORIGIN`, `ROTATION_SECRET`
 
-**4. Wire them together:**
-- Back in Vercel, set `VITE_AGENT_URL` to `https://feral-ops-agent.up.railway.app/chat`
-- Redeploy the frontend (Vercel does this automatically on env var changes, or trigger manually)
-
-Now the board is a real URL you and your employees can bookmark on any device —
-no local servers to keep running.
+Both are on Render's **free tier**, which means they spin down after ~15
+minutes of inactivity and take 30-60 seconds to wake up on the next request —
+this is expected, not a bug. A free uptime pinger (e.g. UptimeRobot) hitting
+`/health` on the agent every 10 minutes keeps it warm if that delay is
+annoying.
 
 ## Next steps once this is running
 
 - Consider a "who's online" indicator using Supabase Presence, if it'd help
   to see who's actively looking at the board
-- A level-up toast/animation would land better than the number silently changing
-- Decide what gems are actually redeemable for once the novelty needs a payoff
+- Gems currently buy cosmetic classes/skills in the Shop (equipped titles on
+  the leaderboard) — decide if a real-world reward should ever be layered on
+  top once that novelty needs a bigger payoff
+- Set up the free weekly shop-rotation scheduler if you haven't yet: a free
+  cron-job.org account hitting `/admin/rotate-shop?secret=...` on the agent,
+  weekly
