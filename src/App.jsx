@@ -6,6 +6,7 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import AgentPanel from './components/AgentPanel';
 import Shop from './components/Shop';
+import SkyBackground from './components/SkyBackground';
 import LevelUpToast from './components/LevelUpToast';
 import InviteTeammateModal from './components/InviteTeammateModal';
 import SetPasswordModal from './components/SetPasswordModal';
@@ -45,26 +46,36 @@ export default function App() {
 
   if (session === undefined) return null; // brief flash-free load
   if (!session) {
-    return authView === 'signup' ? (
-      <Signup onSwitchToLogin={() => setAuthView('login')} />
-    ) : (
-      <Login onSwitchToSignup={() => setAuthView('signup')} />
+    return (
+      <>
+        <SkyBackground />
+        {authView === 'signup' ? (
+          <Signup onSwitchToLogin={() => setAuthView('login')} />
+        ) : (
+          <Login onSwitchToSignup={() => setAuthView('signup')} />
+        )}
+      </>
     );
   }
 
   if (needsPassword) {
     return (
-      <SetPasswordModal
-        onDone={() => {
-          window.history.replaceState(null, '', window.location.pathname);
-          setNeedsPassword(false);
-        }}
-      />
+      <>
+        <SkyBackground />
+        <SetPasswordModal
+          onDone={() => {
+            window.history.replaceState(null, '', window.location.pathname);
+            setNeedsPassword(false);
+          }}
+        />
+      </>
     );
   }
 
   return (
-    <div className="app">
+    <>
+      <SkyBackground />
+      <div className="app">
       <header className="app-header">
         <img src={wolfMark} alt="Feral Services" className="mark" />
         <div>
@@ -92,6 +103,7 @@ export default function App() {
       <LevelUpToast />
       {showShop && <Shop onClose={() => setShowShop(false)} />}
       {showInvite && <InviteTeammateModal onClose={() => setShowInvite(false)} />}
-    </div>
+      </div>
+    </>
   );
 }
