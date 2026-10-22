@@ -17,6 +17,7 @@ export default function NewQuestModal({ onClose }) {
     deadline: '',
     notes: '',
     items: '',
+    is_coop: false,
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -58,6 +59,7 @@ export default function NewQuestModal({ onClose }) {
       deadline: form.deadline || null,
       notes: form.notes.trim() || null,
       items: form.items.trim() || null,
+      is_coop: form.is_coop,
       created_by: userData?.user?.id ?? null,
       status: 'todo', // posted unclaimed — anyone can accept it
     });
@@ -106,6 +108,15 @@ export default function NewQuestModal({ onClose }) {
               <option value="mythical">Mythical — 5000 XP, 1500 gems (Questmaster only)</option>
             )}
           </select>
+        </label>
+
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            checked={form.is_coop}
+            onChange={(e) => setForm((f) => ({ ...f, is_coop: e.target.checked }))}
+          />
+          Co-op Quest — a whole party can join and share the reward
         </label>
 
         <label>
