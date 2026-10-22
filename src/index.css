@@ -983,6 +983,15 @@ body {
   resize: vertical;
 }
 .modal-error { color: var(--rust); font-size: 13px; }
+
+.checkbox-label {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px !important;
+}
+.checkbox-label input { width: auto; }
+
+.coop-tag { color: #1a6b64; font-weight: 700; }
 .modal-actions {
   display: flex;
   justify-content: flex-end;
