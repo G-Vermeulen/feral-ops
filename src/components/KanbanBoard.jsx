@@ -14,6 +14,7 @@ const COLUMNS = [
 export default function KanbanBoard() {
   const [jobs, setJobs] = useState([]);
   const [tasksByJob, setTasksByJob] = useState({});
+  const [partyByJob, setPartyByJob] = useState({}); // jobId -> [memberId, ...]
   const [members, setMembers] = useState({}); // id -> display_name
   const [currentUserId, setCurrentUserId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -45,6 +46,18 @@ export default function KanbanBoard() {
     }
   }, []);
 
+  const loadParty = useCallback(async () => {
+    const { data, error } = await supabase.from('quest_party').select('job_id, member_id');
+    if (!error) {
+      const grouped = {};
+      for (const p of data ?? []) {
+        grouped[p.job_id] = grouped[p.job_id] || [];
+        grouped[p.job_id].push(p.member_id);
+      }
+      setPartyByJob(grouped);
+    }
+  }, []);
+
   const loadMembers = useCallback(async () => {
     const { data, error } = await supabase.from('team_members').select('id, display_name');
     if (!error) {
@@ -57,6 +70,7 @@ export default function KanbanBoard() {
   useEffect(() => {
     loadJobs();
     loadTasks();
+    loadParty();
     loadMembers();
     supabase.auth.getUser().then(({ data }) => setCurrentUserId(data?.user?.id ?? null));
 
@@ -64,11 +78,12 @@ export default function KanbanBoard() {
       .channel('quest-board')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, () => loadJobs())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => loadTasks())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'quest_party' }, () => loadParty())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'team_members' }, () => loadMembers())
       .subscribe();
 
     return () => supabase.removeChannel(channel);
-  }, [loadJobs, loadTasks, loadMembers]);
+  }, [loadJobs, loadTasks, loadParty, loadMembers]);
 
   const visibleJobs = jobs
     .filter((j) => j.status !== 'cancelled')
@@ -103,6 +118,57 @@ export default function KanbanBoard() {
     if (error) {
       console.error('Failed to accept quest', error);
       loadJobs();
+    }
+  };
+
+  const joinParty = async (job, e) => {
+    e?.stopPropagation?.();
+    if (!currentUserId) return;
+
+    setPartyByJob((prev) => ({
+      ...prev,
+      [job.id]: [...new Set([...(prev[job.id] || []), currentUserId])],
+    }));
+    const { error: joinError } = await supabase
+      .from('quest_party')
+      .insert({ job_id: job.id, member_id: currentUserId });
+    if (joinError) {
+      console.error('Failed to join party', joinError);
+      loadParty();
+      return;
+    }
+
+    // First person to join becomes the leader and moves the quest into progress.
+    if (!job.assigned_to) {
+      await supabase
+        .from('jobs')
+        .update({ assigned_to: currentUserId, status: 'in_progress' })
+        .eq('id', job.id);
+    }
+  };
+
+  const leaveParty = async (job, e) => {
+    e?.stopPropagation?.();
+    if (!currentUserId) return;
+
+    setPartyByJob((prev) => ({
+      ...prev,
+      [job.id]: (prev[job.id] || []).filter((id) => id !== currentUserId),
+    }));
+    await supabase
+      .from('quest_party')
+      .delete()
+      .eq('job_id', job.id)
+      .eq('member_id', currentUserId);
+
+    // If the leader leaves, hand leadership to whoever's left, or reopen the quest.
+    if (job.assigned_to === currentUserId) {
+      const remaining = (partyByJob[job.id] || []).filter((id) => id !== currentUserId);
+      if (remaining.length > 0) {
+        await supabase.from('jobs').update({ assigned_to: remaining[0] }).eq('id', job.id);
+      } else {
+        await supabase.from('jobs').update({ assigned_to: null, status: 'todo' }).eq('id', job.id);
+      }
     }
   };
 
@@ -209,7 +275,11 @@ export default function KanbanBoard() {
                   const diff = DIFFICULTY[job.difficulty] || DIFFICULTY.common;
                   const objectives = tasksByJob[job.id] || [];
                   const doneCount = objectives.filter((t) => t.done).length;
-                  const isUnclaimed = !job.assigned_to;
+                  const partyIds = partyByJob[job.id] || [];
+                  const isInParty = currentUserId && partyIds.includes(currentUserId);
+                  const hasParty = partyIds.length > 0;
+                  const isUnclaimed = job.is_coop ? !hasParty : !job.assigned_to;
+                  const canAct = job.is_coop ? hasParty : !isUnclaimed;
 
                   return (
                     <div
@@ -222,7 +292,10 @@ export default function KanbanBoard() {
                     >
                       <span className={`wax-seal seal-${job.difficulty}`} aria-hidden="true" />
                       <div className="job-top-row">
-                        <span className="job-rarity-tag">{diff.label}</span>
+                        <span className="job-rarity-tag">
+                          {diff.label}
+                          {job.is_coop && <span className="coop-tag"> · Co-op</span>}
+                        </span>
                         <span className="job-rewards">
                           <span className="job-xp">+{job.xp_reward} XP</span>
                           <span className="job-gems">◆{job.gem_reward}</span>
@@ -236,6 +309,10 @@ export default function KanbanBoard() {
                       <div className="job-owner">
                         {isUnclaimed ? (
                           <span className="unclaimed-tag">Unclaimed</span>
+                        ) : job.is_coop ? (
+                          <span className="claimed-tag">
+                            Party: {partyIds.map((id) => members[id] || 'someone').join(', ')}
+                          </span>
                         ) : (
                           <span className="claimed-tag">
                             Claimed by {members[job.assigned_to] || 'someone'}
@@ -243,13 +320,29 @@ export default function KanbanBoard() {
                         )}
                       </div>
 
-                      {isUnclaimed && currentUserId && (
-                        <button className="accept-btn" onClick={(e) => acceptQuest(job, e)}>
-                          Accept Quest
-                        </button>
+                      {job.is_coop ? (
+                        <>
+                          {currentUserId && !isInParty && job.status !== 'done' && (
+                            <button className="accept-btn" onClick={(e) => joinParty(job, e)}>
+                              Join Party
+                            </button>
+                          )}
+                          {isInParty && job.status !== 'done' && (
+                            <button className="return-btn" onClick={(e) => leaveParty(job, e)}>
+                              Leave Party
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        isUnclaimed &&
+                        currentUserId && (
+                          <button className="accept-btn" onClick={(e) => acceptQuest(job, e)}>
+                            Accept Quest
+                          </button>
+                        )
                       )}
 
-                      {!isUnclaimed && job.status === 'review' && (
+                      {canAct && job.status === 'review' && (
                         <button
                           className="return-btn"
                           onClick={(e) => returnToProgress(job, e)}
@@ -258,7 +351,7 @@ export default function KanbanBoard() {
                         </button>
                       )}
 
-                      {!isUnclaimed && job.status !== 'done' && (
+                      {canAct && job.status !== 'done' && (
                         <div className="quest-action-row">
                           <button className="complete-btn" onClick={(e) => completeQuest(job, e)}>
                             Complete
@@ -300,6 +393,8 @@ export default function KanbanBoard() {
           job={detailJob}
           objectives={tasksByJob[detailJob.id] || []}
           memberName={members[detailJob.assigned_to]}
+          partyNames={(partyByJob[detailJob.id] || []).map((id) => members[id] || 'someone')}
+          isInParty={!!(currentUserId && (partyByJob[detailJob.id] || []).includes(currentUserId))}
           currentUserId={currentUserId}
           newObjectiveText={newObjectiveText[detailJob.id]}
           onChangeObjectiveText={(text) =>
@@ -311,6 +406,8 @@ export default function KanbanBoard() {
           onComplete={completeQuest}
           onCancel={cancelQuest}
           onReturn={returnToProgress}
+          onJoinParty={joinParty}
+          onLeaveParty={leaveParty}
           onClose={() => setDetailJobId(null)}
         />
       )}
