@@ -21,6 +21,7 @@ export const toolDefinitions = [
           description: 'How much effort this quest takes. Default to common for routine work, rare for multi-day jobs, epic for full brand identities, legendary for major/high-stakes clients.',
         },
         deadline: { type: 'string', description: 'YYYY-MM-DD, optional' },
+        is_coop: { type: 'boolean', description: 'True if multiple team members can team up on this quest together and split the reward. Default false.' },
         notes: { type: 'string', description: 'Quest information / briefing context' },
         items: { type: 'string', description: 'Required assets or materials, e.g. "logo files, brand colors"' },
       },
