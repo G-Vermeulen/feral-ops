@@ -4,6 +4,8 @@ export default function QuestDetailModal({
   job,
   objectives,
   memberName,
+  partyNames = [],
+  isInParty = false,
   currentUserId,
   newObjectiveText,
   onChangeObjectiveText,
@@ -13,10 +15,13 @@ export default function QuestDetailModal({
   onComplete,
   onCancel,
   onReturn,
+  onJoinParty,
+  onLeaveParty,
   onClose,
 }) {
   const diff = DIFFICULTY[job.difficulty] || DIFFICULTY.common;
-  const isUnclaimed = !job.assigned_to;
+  const isUnclaimed = job.is_coop ? partyNames.length === 0 : !job.assigned_to;
+  const canAct = job.is_coop ? partyNames.length > 0 : !isUnclaimed;
   const doneCount = objectives.filter((t) => t.done).length;
 
   return (
@@ -32,7 +37,10 @@ export default function QuestDetailModal({
         <span className={`wax-seal seal-${job.difficulty}`} aria-hidden="true" />
 
         <div className="job-top-row">
-          <span className="job-rarity-tag">{diff.label}</span>
+          <span className="job-rarity-tag">
+            {diff.label}
+            {job.is_coop && <span className="coop-tag"> · Co-op</span>}
+          </span>
           <span className="job-rewards">
             <span className="job-xp">+{job.xp_reward} XP</span>
             <span className="job-gems">◆{job.gem_reward}</span>
@@ -47,24 +55,42 @@ export default function QuestDetailModal({
         <div className="job-owner">
           {isUnclaimed ? (
             <span className="unclaimed-tag">Unclaimed</span>
+          ) : job.is_coop ? (
+            <span className="claimed-tag">Party: {partyNames.join(', ')}</span>
           ) : (
             <span className="claimed-tag">Claimed by {memberName || 'someone'}</span>
           )}
         </div>
 
-        {isUnclaimed && currentUserId && (
-          <button className="accept-btn" onClick={() => onAccept(job)}>
-            Accept Quest
-          </button>
+        {job.is_coop ? (
+          <>
+            {currentUserId && !isInParty && job.status !== 'done' && (
+              <button className="accept-btn" onClick={() => onJoinParty(job)}>
+                Join Party
+              </button>
+            )}
+            {isInParty && job.status !== 'done' && (
+              <button className="return-btn" onClick={() => onLeaveParty(job)}>
+                Leave Party
+              </button>
+            )}
+          </>
+        ) : (
+          isUnclaimed &&
+          currentUserId && (
+            <button className="accept-btn" onClick={() => onAccept(job)}>
+              Accept Quest
+            </button>
+          )
         )}
 
-        {!isUnclaimed && job.status === 'review' && (
+        {canAct && job.status === 'review' && (
           <button className="return-btn" onClick={() => onReturn(job)}>
             ← Back to In Progress
           </button>
         )}
 
-        {!isUnclaimed && job.status !== 'done' && (
+        {canAct && job.status !== 'done' && (
           <div className="quest-action-row">
             <button className="complete-btn" onClick={() => onComplete(job)}>
               Complete
